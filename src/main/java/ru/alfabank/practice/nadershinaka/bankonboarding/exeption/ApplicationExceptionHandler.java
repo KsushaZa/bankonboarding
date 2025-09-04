@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.ErrorResponse;
 
-
+@ControllerAdvice
 public class ApplicationExceptionHandler {
 
 

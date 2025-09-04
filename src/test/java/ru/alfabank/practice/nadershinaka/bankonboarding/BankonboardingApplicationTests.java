@@ -29,11 +29,4 @@ class BankonboardingApplicationTests {
 		Assertions.assertEquals("Добро пожаловать в наш чудесный магазин!", answer);
 	}
 
-//	@Test
-//	void expectProductList () {
-//		ProductList productList = shopController.getProduct();
-//		Assertions.assertEquals(productList, productList);
-//
-//	}
-
 }

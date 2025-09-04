@@ -13,10 +13,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
+import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.ApplicationExceptionHandler;
 import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSuchProductException;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequest;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequestList;
@@ -43,20 +45,8 @@ public class ShopControllerTest {
     @ServiceConnection
     static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
 
-//    @BeforeEach
-//    void fillData(@Autowired ProductRepository repository) {
-//        repository.deleteAll();
-//        repository.save(new Product("66", "Nut", 230, true));
-//        repository.save(new Product("67", "Oatmeal", 100, true));
-//        repository.save(new Product("68", "Porridge mix", 450, true));
-//        for (Product p : repository.findAll()) {
-//            System.out.println(p.getName());
-//        }
-//    }
-
     @Autowired
     private ObjectMapper objectMapper; // автоматически настроен Spring'ом
-
 
     @Autowired
     ProductRepository repository;
@@ -99,7 +89,8 @@ public class ShopControllerTest {
                 .andExpect(jsonPath("$.amountOrder").exists())
                 .andExpect(jsonPath("$.orders").isArray());
     }
-//
+
+//При отсутствии продукта ошибка 400 с текстом "Нет продукта с id:.."
     @Test
     void shouldReturnNoSuchProductException() throws Exception {
         OrderCalculationRequest request1 = new OrderCalculationRequest();
@@ -120,11 +111,8 @@ public class ShopControllerTest {
         mockMvc.perform(post("/calc")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestList)))
-                .andExpect(jsonPath("$.").value("Нет продукта с id: 3"));
-//                .andDo(print()).andExpect(status().isInternalServerError()); // 500
-//                .andExpect(jsonPath("$.message").value("Нет продукта с id: 3"));
-//                .andExpect(status().isBadRequest());
-//                .andExpect(jsonPath("$.message").value("Нет продукта с id"));
+                .andDo(print()).andExpect(status().is(400))
+                .andExpect(jsonPath("$.message").value("Нет продукта с id: 3"));
     }
 
     //проверка методов в сервисе:

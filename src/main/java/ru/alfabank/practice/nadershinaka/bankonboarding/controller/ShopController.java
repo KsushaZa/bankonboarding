@@ -8,6 +8,7 @@ import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRe
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderInfo;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.ProductList;
+import ru.alfabank.practice.nadershinaka.bankonboarding.repository.ProductRepository;
 import ru.alfabank.practice.nadershinaka.bankonboarding.service.ProductService;
 
 
@@ -19,6 +20,9 @@ public class ShopController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @GetMapping("/welcome")
     public String getWelcomeWord() {
@@ -51,7 +55,7 @@ public class ShopController {
 
     @PostMapping(value = "/saveProduct", produces = MediaType.APPLICATION_JSON_VALUE)
     public void saveProduct(Product product) {
-        productService.saveProduct(product);
+        productRepository.save(product);
     }
 
 //    @PostMapping(value = "/saveDiscount", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -12,7 +12,5 @@ public interface ProductService {
     List<Product> getAllNotAvailableProduct();
     public Product getProduct(String id);
     OrderInfo calculateOrder(List<OrderCalculationRequest> orderCalculationRequests);
-    public void saveProduct(Product product);
-//    public void saveDiscount(Discount discount);
 
 }
