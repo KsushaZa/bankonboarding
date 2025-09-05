@@ -1,20 +1,19 @@
 package ru.alfabank.practice.nadershinaka.bankonboarding.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Discount;
+import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
 import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSuchProductException;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.Order;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequest;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderInfo;
-import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
 import ru.alfabank.practice.nadershinaka.bankonboarding.repository.DiscountRepository;
 import ru.alfabank.practice.nadershinaka.bankonboarding.repository.ProductRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -42,17 +41,6 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getAllNotAvailableProduct() {
         return productRepository.findAllByAvailableFalse();
     }
-
-    //ищем по id скидку, берем первую либо возвращаем 0
-//    public Integer getDiscountByProductId(String id) {
-//        Integer discount = discountRepository.findAll()
-//                .stream()
-//                .filter(d -> d.getProductList().contains(id)) //проверяем у каждой скидки есть ли в ней товар с таким id
-//                .map(d -> d.getPercent())
-//                .findFirst()
-//                .orElse(0);
-//        return discount;
-//    }
 
 
     //ищет по id товар, если товара нет - ошибка
@@ -105,11 +93,12 @@ public class ProductServiceImpl implements ProductService {
 
             //Получаем размер скидки по продукту
             Integer summDiscountByProductId = calculateDiscount(productId);
+
             Order order = new Order(element.getQuantity(), product);
 
             //Рассчитываем общую сумму заказа
             if (summDiscountByProductId == 0) {
-                totalPrice = order.totalCost();
+                totalPrice += order.totalCost();
             } else {
                 totalPrice += calculateCostWithDiscount(product, element.getQuantity(), summDiscountByProductId, price);
             }
@@ -117,22 +106,4 @@ public class ProductServiceImpl implements ProductService {
         }
         return new OrderInfo(totalPrice, orders);
     }
-
-//    //каждую минуту делает недоступным два товара
-//    @Scheduled(fixedRate = 60000)
-//    public void changeAvailable() {
-//        List<Product> products = productRepository.findAll();
-//        if (products.isEmpty()) {
-//            return;
-//        }
-//        products.forEach(p -> p.setAvailable(true));
-//        for (int i = 0; i < 2; i++) {
-//            int index = random.nextInt(products.size());
-//            Product p = products.get(index);
-//            p.setAvailable(false);
-//            logger.info("Change available of product ID:" + p.getId());
-//            products.remove(index);
-//        }
-//        productRepository.saveAll(products);
-//    }
 }
