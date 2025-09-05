@@ -70,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     //Расчет стоимости продукта с учетом количества и скидки
-    public int calculateCostWithDiscount(Product product, Integer quantity, Integer summDiscountByProductId, Integer price) {
+    public int calculateCostWithDiscount(Integer quantity, Integer summDiscountByProductId, Integer price) {
         return price * quantity - (price * summDiscountByProductId / 100) * quantity;
     }
 
@@ -92,15 +92,15 @@ public class ProductServiceImpl implements ProductService {
             Integer price = product.getPrice();
 
             //Получаем размер скидки по продукту
-            Integer summDiscountByProductId = calculateDiscount(productId);
+            Integer totalDiscountProduct = calculateDiscount(productId);
 
             Order order = new Order(element.getQuantity(), product);
 
             //Рассчитываем общую сумму заказа
-            if (summDiscountByProductId == 0) {
+            if (totalDiscountProduct == 0) {
                 totalPrice += order.totalCost();
             } else {
-                totalPrice += calculateCostWithDiscount(product, element.getQuantity(), summDiscountByProductId, price);
+                totalPrice += calculateCostWithDiscount(element.getQuantity(), totalDiscountProduct, price);
             }
             orders.add(order);
         }
