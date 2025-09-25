@@ -1,6 +1,6 @@
 package ru.alfabank.practice.nadershinaka.bankonboarding.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import ru.alfabank.practice.nadershinaka.bankonboarding.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.alfabank.practice.nadershinaka.bankonboarding.dadataClient.DaDataClient;
@@ -21,11 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
 @Service
-
 public class ProductServiceImpl implements ProductService {
-
     private final ProductRepository productRepository;
     private final DiscountRepository discountRepository;
     private final DaDataClient daDataClient; // Feign-клиент внедрён
@@ -39,17 +36,16 @@ public class ProductServiceImpl implements ProductService {
     @Value("${dadata.api-key}")
     private String daDataApiKey;
 
+    @Log
     @Override
     public List<Product> getProducts() {
         return productRepository.findAllByAvailableTrue();
     }
 
-
     @Override
     public List<Product> getAllNotAvailableProduct() {
         return productRepository.findAllByAvailableFalse();
     }
-
 
     //ищет по id товар, если товара нет - ошибка
     @Override
@@ -87,6 +83,7 @@ public class ProductServiceImpl implements ProductService {
     //скидка суммируется, но не более 50%
     //если вводишь id несуществующего товара - ошибка 400 с id товара
     @Override
+    @Log
     public OrderInfo calculateOrder(OrderCalculationRequestList orderCalculationRequestList) {
 
         String deliveryAddress = orderCalculationRequestList.getDeliveryAddress();
