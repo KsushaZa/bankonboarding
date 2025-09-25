@@ -4,6 +4,7 @@ import java.util.List;
 
 public class OrderCalculationRequestList {
     private List<OrderCalculationRequest> orderCalculationRequestList;
+    private String deliveryAddress;
 
     public OrderCalculationRequestList(List<OrderCalculationRequest> orderCalculationRequestList) {
         this.orderCalculationRequestList = orderCalculationRequestList;
@@ -15,5 +16,13 @@ public class OrderCalculationRequestList {
 
     public void setOrderCalculationRequestList(List<OrderCalculationRequest> orderCalculationRequestList) {
         this.orderCalculationRequestList = orderCalculationRequestList;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
     }
 }

@@ -1,18 +1,24 @@
 package ru.alfabank.practice.nadershinaka.bankonboarding.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.alfabank.practice.nadershinaka.bankonboarding.dadataClient.DaDataClient;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Discount;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
 import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSuchProductException;
+import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSushAddressException;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.Order;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequest;
+import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequestList;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderInfo;
+import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.DadataResponse;
 import ru.alfabank.practice.nadershinaka.bankonboarding.repository.DiscountRepository;
 import ru.alfabank.practice.nadershinaka.bankonboarding.repository.ProductRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -22,14 +28,16 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final DiscountRepository discountRepository;
+    private final DaDataClient daDataClient; // Feign-клиент внедрён
 
-
-    @Autowired
-    public ProductServiceImpl(ProductRepository productRepository,
-                              DiscountRepository discountRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, DaDataClient daDataClient) {
         this.productRepository = productRepository;
         this.discountRepository = discountRepository;
+        this.daDataClient = daDataClient;
     }
+
+    @Value("${dadata.api-key}")
+    private String daDataApiKey;
 
     @Override
     public List<Product> getProducts() {
@@ -79,11 +87,20 @@ public class ProductServiceImpl implements ProductService {
     //скидка суммируется, но не более 50%
     //если вводишь id несуществующего товара - ошибка 400 с id товара
     @Override
-    public OrderInfo calculateOrder(List<OrderCalculationRequest> orderCalculationRequests) {
+    public OrderInfo calculateOrder(OrderCalculationRequestList orderCalculationRequestList) {
+
+        String deliveryAddress = orderCalculationRequestList.getDeliveryAddress();
+        Map<String, String> request = Map.of("query", deliveryAddress);
+        DadataResponse response = daDataClient.searchAddress("Token " + daDataApiKey, request);
+
+        if (!response.getSuggestions().get(0).getData().getFias_level().equals("8")) {
+            throw new NoSushAddressException(deliveryAddress);
+        }
+
         int totalPrice = 0;
         List<Order> orders = new ArrayList<>();
 
-        for (OrderCalculationRequest element : orderCalculationRequests) {
+        for (OrderCalculationRequest element : orderCalculationRequestList.getOrderCalculationRequestList()) {
             String productId = element.getId().toString();
             Product product = getProduct(productId);
             if (!product.isAvailable()) {

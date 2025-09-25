@@ -57,9 +57,7 @@ public class ScheduleTest {
         Assertions.assertTrue(captor.getValue().get(3).isAvailable());
         Assertions.assertTrue(captor.getValue().get(4).isAvailable());
         Assertions.assertTrue(captor.getValue().get(5).isAvailable());
-
     }
-
 
     @Test
     void changeAvailable_WhenNoProducts_ShouldDoNothing() {
