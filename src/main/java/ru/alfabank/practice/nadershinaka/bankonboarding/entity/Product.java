@@ -3,7 +3,6 @@ package ru.alfabank.practice.nadershinaka.bankonboarding.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-// todo создать entity
 @Document("products")
 public class Product {
 

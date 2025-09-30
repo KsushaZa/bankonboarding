@@ -23,7 +23,7 @@ public class ShopController {
     @GetMapping("/welcome")
     public String getWelcomeWord() {
         return "Добро пожаловать в наш чудесный магазин!";
-    }//todo вернуть объект json
+    }
 
     @PostMapping(value = "/saveProduct", produces = MediaType.APPLICATION_JSON_VALUE)
     public void saveProduct(Product product) {

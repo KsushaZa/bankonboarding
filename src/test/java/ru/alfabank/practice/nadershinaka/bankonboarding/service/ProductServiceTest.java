@@ -1,18 +1,24 @@
 package ru.alfabank.practice.nadershinaka.bankonboarding.service;
 
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.alfabank.practice.nadershinaka.bankonboarding.dadataClient.DaDataClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.util.ReflectionTestUtils;
+import ru.alfabank.practice.nadershinaka.bankonboarding.client.DaDataClient;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Discount;
-import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSuchProductException;
+import ru.alfabank.practice.nadershinaka.bankonboarding.exception.NoSuchProductException;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequest;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequestList;
+import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.DadataRequest;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.DadataResponse;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.Data;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.Suggestions;
@@ -22,12 +28,14 @@ import ru.alfabank.practice.nadershinaka.bankonboarding.repository.ProductReposi
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +49,7 @@ public class ProductServiceTest {
     private DaDataClient daDataClient;
     @InjectMocks
     private ProductServiceImpl productService;
+
 
     @BeforeAll
     static void setUp() {
@@ -74,9 +83,9 @@ public class ProductServiceTest {
         Integer quantity = 3;
         Integer discountPercent = 10;
 
-        int result = productService.calculateCostWithDiscount(quantity, discountPercent, price);
+        int expectedDiscountedPrice = productService.calculateCostWithDiscount(quantity, discountPercent, price);
 
-        assertEquals(270, result);
+        assertEquals(270, expectedDiscountedPrice);
     }
 
     @Test
@@ -88,43 +97,24 @@ public class ProductServiceTest {
         Assertions.assertDoesNotThrow(() -> productService.calculateCostWithDiscount(quantity, discountPercent, price));
     }
 
-
     @Test
-    public void calculateOrder_shouldReturnTotalPrice() {
+    void calculateOrder_shouldThrowNoSuchProductException() {
         OrderCalculationRequest or1 = new OrderCalculationRequest("1", 2);
-        OrderCalculationRequest or2 = new OrderCalculationRequest("3", 1);
-
-        List<OrderCalculationRequest> orderCalculationRequests = Arrays.asList(or1, or2);
-        OrderCalculationRequestList orderCalculationRequestList = new OrderCalculationRequestList(orderCalculationRequests);
-        orderCalculationRequestList.setDeliveryAddress("жопа");
+        OrderCalculationRequestList requestList = new OrderCalculationRequestList(List.of(or1));
+        requestList.setDeliveryAddress("уфа ленина д 3 кв 2");
 
         Data data = new Data();
         data.setFias_level("8");
-
         Suggestions suggestion = new Suggestions();
         suggestion.setData(data);
-
         DadataResponse response = new DadataResponse();
-        response.setSuggestions(Arrays.asList(suggestion)); // безопасно
-
-        when(daDataClient.searchAddress(anyString(), anyMap())).thenReturn(response);
+        response.setSuggestions(List.of(suggestion));
+        when(daDataClient.searchAddress(isNull(), ArgumentMatchers.any(DadataRequest.class)))
+                .thenReturn(response);
         when(productRepository.findById("1")).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(NoSuchProductException.class, () -> productService.calculateOrder(orderCalculationRequestList));
+        assertThrows(NoSuchProductException.class,
+                () -> productService.calculateOrder(requestList));
     }
-//    @BeforeEach
-//    public void setup() {
-//        this.productService.setBase("http://localhost:"
-//                + this.environment.getProperty("wiremock.server.port"));
-//    }
-//
-//    // Using the WireMock APIs in the normal way:
-//    @Test
-//    public void contextLoads() throws Exception {
-//        // Stubbing WireMock
-//        stubFor(get(urlEqualTo("/resource")).willReturn(aResponse()
-//                .withHeader("Content-Type", "text/plain").withBody("Hello World!")));
-//        // We're asserting if WireMock responded properly
-//        assertThat(this.service.go()).isEq
-
 }
+

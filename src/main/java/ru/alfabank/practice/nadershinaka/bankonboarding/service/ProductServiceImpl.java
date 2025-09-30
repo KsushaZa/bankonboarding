@@ -1,40 +1,42 @@
 package ru.alfabank.practice.nadershinaka.bankonboarding.service;
 
-import ru.alfabank.practice.nadershinaka.bankonboarding.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.alfabank.practice.nadershinaka.bankonboarding.dadataClient.DaDataClient;
+import ru.alfabank.practice.nadershinaka.bankonboarding.client.DaDataClient;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Discount;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
-import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSuchProductException;
-import ru.alfabank.practice.nadershinaka.bankonboarding.exeption.NoSushAddressException;
+import ru.alfabank.practice.nadershinaka.bankonboarding.exception.NoSuchProductException;
+import ru.alfabank.practice.nadershinaka.bankonboarding.exception.NoSushAddressException;
+import ru.alfabank.practice.nadershinaka.bankonboarding.logging.Log;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.Order;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequest;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderCalculationRequestList;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.OrderInfo;
+import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.DadataRequest;
 import ru.alfabank.practice.nadershinaka.bankonboarding.model.dto.DadataResponse;
 import ru.alfabank.practice.nadershinaka.bankonboarding.repository.DiscountRepository;
 import ru.alfabank.practice.nadershinaka.bankonboarding.repository.ProductRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final DiscountRepository discountRepository;
-    private final DaDataClient daDataClient; // Feign-клиент внедрён
+    private final DaDataClient daDataClient;
+    private final String daDataAuthHeader;
+//    @Value("${dadata.api-key}")
+    private String daDataApiKey;
 
-    public ProductServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, DaDataClient daDataClient) {
+    public ProductServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, DaDataClient daDataClient, String daDataAuthHeader, @Value("${dadata.api-key}") String daDataApiKey) {
         this.productRepository = productRepository;
         this.discountRepository = discountRepository;
         this.daDataClient = daDataClient;
+        this.daDataAuthHeader = daDataAuthHeader;
+        this.daDataApiKey = daDataApiKey;
     }
-
-    @Value("${dadata.api-key}")
-    private String daDataApiKey;
 
     @Log
     @Override
@@ -85,10 +87,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Log
     public OrderInfo calculateOrder(OrderCalculationRequestList orderCalculationRequestList) {
-
         String deliveryAddress = orderCalculationRequestList.getDeliveryAddress();
-        Map<String, String> request = Map.of("query", deliveryAddress);
-        DadataResponse response = daDataClient.searchAddress("Token " + daDataApiKey, request);
+        DadataRequest request = new DadataRequest(orderCalculationRequestList.getDeliveryAddress());
+        DadataResponse response = daDataClient.searchAddress(daDataAuthHeader, request);
 
         if (!response.getSuggestions().get(0).getData().getFias_level().equals("8")) {
             throw new NoSushAddressException(deliveryAddress);

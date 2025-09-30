@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
-import ru.alfabank.practice.nadershinaka.bankonboarding.model.ProductList;
+import ru.alfabank.practice.nadershinaka.bankonboarding.model.ProductResponse;
 import ru.alfabank.practice.nadershinaka.bankonboarding.service.ProductService;
 
 import java.util.List;
@@ -19,9 +19,9 @@ public class ProductController {
 
     //Возвращает список всех доступных продуктов
     @GetMapping("/products")
-    public ProductList getProducts() { //todo заменить ProductList на ProductsResponse
+    public ProductResponse getProducts() {
         List<Product> products = productService.getProducts();
-        return new ProductList(products);
+        return new ProductResponse(products);
     }
 
 

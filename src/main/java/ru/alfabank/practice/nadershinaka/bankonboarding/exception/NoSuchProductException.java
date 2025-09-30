@@ -1,4 +1,4 @@
-package ru.alfabank.practice.nadershinaka.bankonboarding.exeption;
+package ru.alfabank.practice.nadershinaka.bankonboarding.exception;
 
 import org.springframework.http.HttpStatus;
 

@@ -3,10 +3,10 @@ package ru.alfabank.practice.nadershinaka.bankonboarding.model;
 import ru.alfabank.practice.nadershinaka.bankonboarding.entity.Product;
 import java.util.List;
 
-public class ProductList {
+public class ProductResponse {
     private List<Product> productList;
 
-    public ProductList(List<Product> productList) {
+    public ProductResponse(List<Product> productList) {
         this.productList = productList;
     }
 

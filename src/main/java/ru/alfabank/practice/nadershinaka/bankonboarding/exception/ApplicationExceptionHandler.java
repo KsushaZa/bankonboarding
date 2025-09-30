@@ -1,6 +1,5 @@
-package ru.alfabank.practice.nadershinaka.bankonboarding.exeption;
+package ru.alfabank.practice.nadershinaka.bankonboarding.exception;
 
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

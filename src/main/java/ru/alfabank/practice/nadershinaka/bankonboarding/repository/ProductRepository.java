@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findAllByAvailableTrue();
-    List<Product> findAllByAvailableFalse();
+    List<Product> findAllByAvailableFalse();//todo добавить тесты на репозиторий
 
 }
