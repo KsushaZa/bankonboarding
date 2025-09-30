@@ -26,16 +26,11 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final DiscountRepository discountRepository;
     private final DaDataClient daDataClient;
-    private final String daDataAuthHeader;
-//    @Value("${dadata.api-key}")
-    private String daDataApiKey;
 
-    public ProductServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, DaDataClient daDataClient, String daDataAuthHeader, @Value("${dadata.api-key}") String daDataApiKey) {
+    public ProductServiceImpl(ProductRepository productRepository, DiscountRepository discountRepository, DaDataClient daDataClient) {
         this.productRepository = productRepository;
         this.discountRepository = discountRepository;
         this.daDataClient = daDataClient;
-        this.daDataAuthHeader = daDataAuthHeader;
-        this.daDataApiKey = daDataApiKey;
     }
 
     @Log
@@ -89,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
     public OrderInfo calculateOrder(OrderCalculationRequestList orderCalculationRequestList) {
         String deliveryAddress = orderCalculationRequestList.getDeliveryAddress();
         DadataRequest request = new DadataRequest(orderCalculationRequestList.getDeliveryAddress());
-        DadataResponse response = daDataClient.searchAddress(daDataAuthHeader, request);
+        DadataResponse response = daDataClient.searchAddress(request);
 
         if (!response.getSuggestions().get(0).getData().getFias_level().equals("8")) {
             throw new NoSushAddressException(deliveryAddress);

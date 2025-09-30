@@ -109,7 +109,7 @@ public class ProductServiceTest {
         suggestion.setData(data);
         DadataResponse response = new DadataResponse();
         response.setSuggestions(List.of(suggestion));
-        when(daDataClient.searchAddress(isNull(), ArgumentMatchers.any(DadataRequest.class)))
+        when(daDataClient.searchAddress(ArgumentMatchers.any(DadataRequest.class)))
                 .thenReturn(response);
         when(productRepository.findById("1")).thenReturn(Optional.empty());
 
